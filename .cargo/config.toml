@@ -1,0 +1,8 @@
+[build]
+target = "mips-nintendo64-none.json"
+
+[unstable]
+build-std = ["core"]
+
+[target.mips-nintendo64-none]
+rustflags = ["-Clinker-plugin-lto"]
