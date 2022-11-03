@@ -7,7 +7,7 @@
 //! Additionally, all parts of the API are freely accessible without any concept of ownership. It is
 //! very likely that software running on the N64 may require shared access to various parts of the
 //! hardware. Forcing developers to pass around a reference to the entire PAC decreases usability,
-//! and is not necessarily unsafe.
+//! and does not necessarily ensure safety.
 //! 
 //! # Safety
 //! Functions in this PAC are marked unsafe if the operation itself could actively cause unexpected
@@ -125,6 +125,7 @@ macro_rules! regfn_rw {
 }
 
 pub mod cp0;
+pub mod si;
 pub mod vi;
 
 pub struct RW<T: Copy>(T);

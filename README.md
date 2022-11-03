@@ -18,7 +18,8 @@ Due to the low-level nature of the API, most projects (games especially) are unl
 |     AI     |  0 of ?   | &#10005; |
 |     PI     |  0 of ?   | &#10005; |
 |     RI     |  0 of ?   | &#10005; |
-|     SI     |  0 of 6?  | &#10005; |
+|     SI     |  6 of 6*  | &#10003; |
+_* The SI likely contains more registers that haven't been fully researched._
 
 
 ### Usage

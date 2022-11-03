@@ -26,22 +26,6 @@ pub struct RegisterBlock {
     pub test_addr: RW<u32>,
     pub staged_data: RW<u32>,
 }
-regfn_rw!(VideoInterface, ctrl, CTRL, CtrlReg);
-regfn_rw!(VideoInterface, origin, ORIGIN, u32);
-regfn_rw!(VideoInterface, width, WIDTH, u32);
-regfn_rw!(VideoInterface, v_intr, V_INTR, u32);
-regfn_rw!(VideoInterface, burst, BURST, BurstReg);
-regfn_rw!(VideoInterface, v_sync, V_SYNC, u32);
-regfn_rw!(VideoInterface, h_sync, H_SYNC, HSyncReg);
-regfn_rw!(VideoInterface, h_sync_leap, H_SYNC_LEAP, HSyncLeapReg);
-regfn_rw!(VideoInterface, h_video, H_VIDEO, HVideoReg);
-regfn_rw!(VideoInterface, v_video, V_VIDEO, VVideoReg);
-regfn_rw!(VideoInterface, v_burst, V_BURST, VBurstReg);
-regfn_rw!(VideoInterface, x_scale, X_SCALE, XScaleReg);
-regfn_rw!(VideoInterface, y_scale, Y_SCALE, YScaleReg);
-regfn_rw!(VideoInterface, test_addr, TEST_ADDR, u32);
-regfn_rw!(VideoInterface, staged_data, STAGED_DATA, u32);
-
 impl VideoInterface {
     /// Creates a new mutable reference to the Video Interface's memory mapped registers, starting at `0xA4400000`.
     /// 
@@ -64,6 +48,22 @@ impl Deref for VideoInterface {
         self.r
     }
 }
+
+regfn_rw!(VideoInterface, ctrl, CTRL, CtrlReg);
+regfn_rw!(VideoInterface, origin, ORIGIN, u32);
+regfn_rw!(VideoInterface, width, WIDTH, u32);
+regfn_rw!(VideoInterface, v_intr, V_INTR, u32);
+regfn_rw!(VideoInterface, burst, BURST, BurstReg);
+regfn_rw!(VideoInterface, v_sync, V_SYNC, u32);
+regfn_rw!(VideoInterface, h_sync, H_SYNC, HSyncReg);
+regfn_rw!(VideoInterface, h_sync_leap, H_SYNC_LEAP, HSyncLeapReg);
+regfn_rw!(VideoInterface, h_video, H_VIDEO, HVideoReg);
+regfn_rw!(VideoInterface, v_video, V_VIDEO, VVideoReg);
+regfn_rw!(VideoInterface, v_burst, V_BURST, VBurstReg);
+regfn_rw!(VideoInterface, x_scale, X_SCALE, XScaleReg);
+regfn_rw!(VideoInterface, y_scale, Y_SCALE, YScaleReg);
+regfn_rw!(VideoInterface, test_addr, TEST_ADDR, u32);
+regfn_rw!(VideoInterface, staged_data, STAGED_DATA, u32);
 
 
 #[derive(IntoPrimitive, FromPrimitive, Copy, Clone, Debug, Eq, PartialEq)]
