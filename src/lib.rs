@@ -85,7 +85,6 @@
 //! 
 
 #![no_std]
-#![feature(alloc_error_handler)]
 #![feature(asm_experimental_arch)]
 #![feature(asm_const)]
 
@@ -124,7 +123,37 @@ macro_rules! regfn_rw {
     }
 }
 
+macro_rules! regfn_ro_union {
+    ($block:ident, $reg:ident, $reg_name:expr, $uniontype:ident) => {
+        paste::paste! {
+            #[doc = concat!("Creates a temporary pointer to the [`", stringify!($block), "`], and reads data from its ", stringify!($reg_name), " register.")]
+            #[inline(always)]
+            pub fn $reg() -> [<$uniontype Read>] {
+                unsafe { $block::new().$reg.read().read }
+            }
+        }
+    };
+}
+macro_rules! regfn_wo_union {
+    ($block:ident, $reg:ident, $reg_name:expr, $uniontype:ident) => {
+        paste::paste! {
+            #[doc = concat!("Creates a temporary pointer to the [`", stringify!($block), "`], and writes data to its ", stringify!($reg_name), " register.")]
+            #[inline(always)]
+            pub fn [<set_ $reg>](data: [<$uniontype Write>]) {
+                $block::new().$reg.write($uniontype { write: data });
+            }
+        }
+    }
+}
+macro_rules! regfn_rw_union {
+    ($block:ident, $reg:ident, $reg_name:expr, $uniontype:ident) => {
+        regfn_ro_union!($block, $reg, $reg_name, $uniontype);
+        regfn_wo_union!($block, $reg, $reg_name, $uniontype);
+    }
+}
+
 pub mod cp0;
+pub mod mi;
 pub mod si;
 pub mod vi;
 
