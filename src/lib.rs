@@ -18,24 +18,35 @@
 //! within an interrupt handler. The PAC is not responsible for either situation.
 //! 
 //! # Memory Mapped Registers
-//! There are three destinct methods for accessing and modifying these registers.
+//! There are two distinct methods for accessing and modifying these registers.
 //! 
-//! ##### Const raw pointers
-//! Every known register is defined as a const `*mut u32` in the [`memory`] module.
+//! ##### Static functions
+//! Each module containing memory mapped registers, will provide static functions for each, where
+//! applicable (e.g. read-only registers won't have a `set_` function).
+//! 
+//! This is the recommended method for low-level interaction with registers.
 //! ```
-//! use n64_pac::memory::VI_CTRL;
-//! 
-//! let mut value = unsafe { VI_CTRL.read_volatile() };
-//! value |= 0x00000003;
-//! unsafe { VI_CTRL.write_volatile(value); }
+//! use n64_pac::vi;
+//! use n64_pac::vi::ColorDepth;
+//!
+//! let mut value = vi::ctrl();
+//! value.set_depth(ColorDepth::BPP32);
+//! vi::set_ctrl(value);
+//! ```
+//! For read-modify-write operations, a `modify()` function is also available:
+//! ```
+//! use n64_pac::vi;
+//! use n64_pac::vi::ColorDepth;
+//!
+//! vi::modify_ctrl(|reg| reg.with_depth(ColorDepth::BPP32));
 //! ```
 //! 
-//! ##### Local RegisterBlock wrapper
-//! This form of access provides a wrapped mutable reference (`&'static mut`) to a peripheral's RegisterBlock.
-//! The RegisterBlock is a struct representation of the registers in memory for the given peripheral.
+//! ##### Local RegisterBlock wrapper object
+//! Alternatively, the wrappers implicitly used by the above static functions, can be created locally. 
 //! 
-//! You do not create the RegisterBlock directly, instead use the wrapper struct named after the
-//! peripheral you are accessing. (e.g. use [`vi::VideoInterface`] for the [`vi`] module/peripheral.
+//! This is not any more or less efficient than the static functions, but it provides a tangible
+//! representation of the registers in memory. This could be useful for HALs that want to hide
+//! PAC-level access inside its own types.
 //! ```
 //! use n64_pac::vi::{ColorDepth, VideoInterface};
 //!
@@ -53,25 +64,6 @@
 //! ```
 //! When the wrapper goes out of scope, the _reference_ will be dropped. The static lifetime attached
 //! to the reference only indicates that the "data" (memory mapped registers) it points to will live forever.
-//! 
-//! ##### Static RegisterBlock wrapper functions
-//! As an alternative to creating a local variable like above, there are static functions that will
-//! implicitly create the RegisterBlock wrapper.
-//! ```
-//! use n64_pac::vi;
-//! use n64_pac::vi::ColorDepth;
-//!
-//! let mut value = vi::ctrl();
-//! value.set_depth(ColorDepth::BPP32);
-//! vi::set_ctrl(value);
-//! ```
-//! For read-modify-write operations, a `modify()` function is also available:
-//! ```
-//! use n64_pac::vi;
-//! use n64_pac::vi::ColorDepth;
-//!
-//! vi::modify_ctrl(|reg| reg.with_depth(ColorDepth::BPP32));
-//! ```
 //! 
 //! # CPU Configuration Registers
 //! These registers are not mapped to memory, and instead require special assembly instructions to access.
@@ -133,7 +125,6 @@ macro_rules! regfn_rw {
 }
 
 pub mod cp0;
-pub mod memory;
 pub mod vi;
 
 pub struct RW<T: Copy>(T);

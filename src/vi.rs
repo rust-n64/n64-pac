@@ -3,7 +3,7 @@ use num_enum::{FromPrimitive, IntoPrimitive};
 use proc_bitfield::bitfield;
 use crate::RW;
 
-/// Pointer to the Video Interface's memory mapped registers.
+/// A wrapper around a mutable reference to the Video Interface's memory mapped registers.
 pub struct VideoInterface {
     r: &'static mut RegisterBlock,
 }
@@ -43,7 +43,10 @@ regfn_rw!(VideoInterface, test_addr, TEST_ADDR, u32);
 regfn_rw!(VideoInterface, staged_data, STAGED_DATA, u32);
 
 impl VideoInterface {
-    /// Creates a new mutable pointer to the Video Interface's memory mapped registers, starting at `0xA4400000`.
+    /// Creates a new mutable reference to the Video Interface's memory mapped registers, starting at `0xA4400000`.
+    /// 
+    /// **This function is only recommended for internal use**, but is exposed for HAL developers who
+    /// wish to create a tangible object around these registers.
     /// 
     /// # Safety
     /// You may create as many of these instances as you wish. Just note that if used in both normal
