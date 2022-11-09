@@ -1,6 +1,6 @@
 [package]
 name = "n64-pac"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Luke Stadem <bigbass1997.website@gmail.com>"]
 description = "Provides low-level CPU and register abstractions for the Nintendo 64 console"

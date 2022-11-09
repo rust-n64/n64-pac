@@ -26,7 +26,7 @@ _* The SI likely contains more registers that haven't been fully researched._
 In your project's `Cargo.toml`:
 ```Toml
 [dependencies]
-n64-pac = "0.1.1"
+n64-pac = "0.2.0"
 ```
 
 Refer to the [docs](https://docs.rs/n64-pac) for examples and details regarding safety.
@@ -34,4 +34,5 @@ Refer to the [docs](https://docs.rs/n64-pac) for examples and details regarding 
 This crate is only intended to be used in the N64 embedded environment. 
 
 ### Nightly Rust
-Unfortunately, the unstable `build-std` cargo feature needed to build the project, still requires a nightly rust toolchain. If/when that is stabilized, this crate should no longer require nightly rust.
+Please note this crate requires a nightly rust toolchain in order to use nightly-only inline assembly features and
+arbitrary discriminants.
