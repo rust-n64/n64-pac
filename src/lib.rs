@@ -4,96 +4,95 @@
 //! Unlike typical PACs, this API is not generated via svd2rust, as it doesn't support the architecture
 //! and the N64 contains features not found on microcontrollers.
 //! 
-//! Additionally, all parts of the API are freely accessible without any concept of ownership. It is
-//! very likely that software running on the N64 may require shared access to various parts of the
-//! hardware. Forcing developers to pass around a reference to the entire PAC decreases usability,
-//! and does not necessarily ensure safety.
+//! Additionally, while a singleton pattern is available to ensure safe access to hardware, helper
+//! functions are available that will bypass this pattern (static write/modify functions require unsafe).
 //! 
-//! # Safety
-//! Functions in this PAC are marked unsafe if the operation itself could actively cause unexpected
-//! or undefined behavior, such as an exception or other form of failure.
+//! # Singleton Pattern
+//! [`Hardware`] is a top-level type that holds access to all available hardware abstractions. Using
+//! [`Hardware::take()`] a single instance of this abstraction can be taken, and if called a second
+//! time, `None` will be returned instead. This ensures safe, race-free, access to low level hardware.
 //! 
-//! It is possible that a write or read-modify-write operation could be unsafe, but only if used in
-//! an async environment or when the same register is accessed from both regular code and from
-//! within an interrupt handler. The PAC is not responsible for either situation.
+//! If the developer wishes to bypass this pattern, such as in cases where interrupts are not used,
+//! or the developer has taken precautions against data races, they have several methods available.
+//! - [Static functions](#static-functions)
+//! - [Wrapper types](#wrapper-types)
 //! 
-//! # Memory Mapped Registers
-//! There are two distinct methods for accessing and modifying these registers.
+//! # Direct hardware access
+//! Both CPU registers and memory mapped registers have two methods of access outside the [`Hardware`]
+//! singleton type. Each method will usually optimize down to identical instructions.
 //! 
-//! ##### Static functions
-//! Each module containing memory mapped registers, will provide static functions for each, where
-//! applicable (e.g. read-only registers won't have a `set_` function).
+//! #### Static functions
+//! Each module contains various read/modify/write functions for accessing hardware.
 //! 
-//! This is the recommended method for low-level interaction with registers.
+//! ##### Examples
+//! Reads the VI_CTRL register, sets the pixel color depth to 32-bits, and writes it back to memory:
 //! ```
 //! use n64_pac::vi;
 //! use n64_pac::vi::ColorDepth;
 //!
 //! let mut value = vi::ctrl();
 //! value.set_depth(ColorDepth::BPP32);
-//! vi::set_ctrl(value);
+//! unsafe {
+//!     vi::set_ctrl(value);
+//! }
 //! ```
-//! For read-modify-write operations, a `modify()` function is also available:
+//! Just like the above example, but using the modify function:
 //! ```
 //! use n64_pac::vi;
 //! use n64_pac::vi::ColorDepth;
-//!
-//! vi::modify_ctrl(|reg| reg.with_depth(ColorDepth::BPP32));
+//! 
+//! unsafe {
+//!     vi::modify_ctrl(|value| value.with_depth(ColorDepth::BPP32));
+//! }
 //! ```
 //! 
-//! ##### Local RegisterBlock wrapper object
-//! Alternatively, the wrappers implicitly used by the above static functions, can be created locally. 
+//! #### Wrapper types
+//! Memory mapped registers are accessed using mutable references that point to their location in memory.
+//! These references are wrapped into a struct for ease of use and so that blocks of registers can be
+//! automatically mapped using only a single pointer address.
 //! 
-//! This is not any more or less efficient than the static functions, but it provides a tangible
-//! representation of the registers in memory. This could be useful for HALs that want to hide
-//! PAC-level access inside its own types.
+//! CPU registers don't use memory locations, but zero-sized structs exist anyways so that they can
+//! be accessed via the top-level [`Hardware`] abstraction.
+//! 
+//! It's recommended to use the [Static functions](#static-functions) instead, as they implicitly
+//! use these wrappers, and will be optimized into the same instructions.
+//! 
+//! ##### Examples
+//! Creates a wrapped pointer to the Video Interface's block of registers, reads the VI_CTRL register,
+//! sets the pixel color depth to 32-bits, and writes it back to memory:
 //! ```
 //! use n64_pac::vi::{ColorDepth, VideoInterface};
 //!
-//! let vi = VideoInterface::new();
+//! let vi = unsafe { VideoInterface::new() };
+//! 
 //! let mut value = vi.ctrl.read();
 //! value.set_depth(ColorDepth::BPP32);
 //! vi.ctrl.write(value);
 //! ```
-//! For read-modify-write operations, a `modify()` function is also available:
+//! Just like the above example, but using the modify method:
 //! ```
 //! use n64_pac::vi::{ColorDepth, VideoInterface};
 //!
-//! let vi = VideoInterface::new();
-//! vi.ctrl.modify(|reg| reg.with_depth(ColorDepth::BPP32));
-//! ```
-//! When the wrapper goes out of scope, the _reference_ will be dropped. The static lifetime attached
-//! to the reference only indicates that the "data" (memory mapped registers) it points to will live forever.
+//! let vi = unsafe { VideoInterface::new() };
 //! 
-//! # CPU Configuration Registers
-//! These registers are not mapped to memory, and instead require special assembly instructions to access.
-//! 
-//! To access these registers, there are static functions available in modules [`cp0`] and [`cp1`].
+//! vi.ctrl.modify(|value| value.with_depth(ColorDepth::BPP32));
 //! ```
-//! use n64_pac::cp0;
-//! 
-//! let mut value = cp0::status();
-//! value.set_ie(true);
-//! cp0::set_status(value);
-//! ```
-//! For read-modify-write operations, a `modify()` function is also available:
-//! ```
-//! use n64_pac::cp0;
-//! 
-//! cp0::modify_status(|reg| reg.with_ie(true));
-//! ```
-//! 
 
 #![no_std]
 #![feature(asm_experimental_arch)]
 #![feature(asm_const)]
+
+use crate::cp0::Cp0;
+use crate::mi::MipsInterface;
+use crate::si::SerialInterface;
+use crate::vi::VideoInterface;
 
 macro_rules! regfn_ro {
     ($block:ident, $reg:ident, $reg_name:expr, $datatype:ident) => {
         #[doc = concat!("Creates a temporary pointer to the [`", stringify!($block), "`], and reads data from its ", stringify!($reg_name), " register.")]
         #[inline(always)]
         pub fn $reg() -> $datatype {
-            $block::new().$reg.read()
+            unsafe { $block::new().$reg.read() }
         }
     };
 }
@@ -102,7 +101,7 @@ macro_rules! regfn_wo {
         paste::paste! {
             #[doc = concat!("Creates a temporary pointer to the [`", stringify!($block), "`], and writes data to its ", stringify!($reg_name), " register.")]
             #[inline(always)]
-            pub fn [<set_ $reg>](data: $datatype) {
+            pub unsafe fn [<set_ $reg>](data: $datatype) {
                 $block::new().$reg.write(data);
             }
         }
@@ -116,7 +115,7 @@ macro_rules! regfn_rw {
         paste::paste! {
             #[doc = concat!("Creates a temporary pointer to the [`", stringify!($block), "`], reads data from its ", stringify!($reg_name), " register, modifies the data, then finally writes back into the register.")]
             #[inline(always)]
-            pub fn [<modify_ $reg>]<F: FnOnce($datatype) -> $datatype>(func: F) {
+            pub unsafe fn [<modify_ $reg>]<F: FnOnce($datatype) -> $datatype>(func: F) {
                 $block::new().$reg.modify(func);
             }
         }
@@ -139,7 +138,7 @@ macro_rules! regfn_wo_union {
         paste::paste! {
             #[doc = concat!("Creates a temporary pointer to the [`", stringify!($block), "`], and writes data to its ", stringify!($reg_name), " register.")]
             #[inline(always)]
-            pub fn [<set_ $reg>](data: [<$uniontype Write>]) {
+            pub unsafe fn [<set_ $reg>](data: [<$uniontype Write>]) {
                 $block::new().$reg.write($uniontype { write: data });
             }
         }
@@ -183,10 +182,8 @@ impl<T: Copy> RW<T> {
     /// the data, and writing the modified data back.
     #[inline(always)]
     pub fn modify<F: FnOnce(T) -> T>(&self, func: F) {
-        unsafe {
-            let ptr = &self.0 as *const T as *mut T;
-            ptr.write_volatile(func(ptr.read_volatile()));
-        }
+        let ptr = &self.0 as *const T as *mut T;
+        unsafe { ptr.write_volatile(func(ptr.read_volatile())); }
     }
 }
 
@@ -205,5 +202,67 @@ impl<T: Copy> WO<T> {
     #[inline(always)]
     pub fn write(&mut self, data: T) {
         unsafe { (&mut self.0 as *mut T).write_volatile(data); }
+    }
+}
+
+static mut HARDWARE_TAKEN: bool = false;
+
+/// Represents all hardware abstractions.
+/// 
+/// For safe use of hardware, this type follows a singleton pattern. Only one instance of `Hardware`
+/// can safely exist at a time. If this is too restrictive for an application, then multiple instances
+/// can be created using [`Hardware::steal()`].
+/// 
+/// Creating multiple instances of this abstraction, or any other abstraction type, could result in
+/// data races when interrupts are enabled, or if using async Rust.
+pub struct Hardware {
+    pub cp0: Cp0,
+    pub mi: MipsInterface,
+    pub vi: VideoInterface,
+    //pub ai: AudioInterface,
+    //pub pi: PeripheralInterface,
+    //pub ri: RdramInterface,
+    pub si: SerialInterface,
+}
+impl Hardware {
+    /// Attempts to take a singleton instance of `Hardware` and return it.
+    /// 
+    /// If `take()` has already been called, `None` will be returned.
+    /// 
+    /// If you need multiple instances, consider using [`Hardware::steal()`].
+    #[inline]
+    pub fn take() -> Option<Self> {
+        if unsafe { HARDWARE_TAKEN } {
+            None
+        } else {
+            Some(unsafe { Self::steal() })
+        }
+    }
+    
+    /// Bypasses the singleton pattern, providing a new abstraction instance of the available hardware.
+    /// 
+    /// # Safety
+    /// If interrupts are enabled, and the same hardware is being modified in both regular code and
+    /// the interrupt handler, a data race might occur. Such that, regular code may have read from
+    /// a register and modified it, but then an interrupt occurs before the write back happens.
+    /// 
+    /// If the interrupt handler writes to the same register, once the interrupt handler finishes, the
+    /// regular code will overwrite whatever value the handler had written.
+    /// 
+    /// When interrupts are not used, or if care is taken to which registers are written to inside and
+    /// outside interrupt handlers, then this method _should_ be safe.
+    #[inline]
+    pub unsafe fn steal() -> Self {
+        HARDWARE_TAKEN = true;
+        
+        Self {
+            cp0: Cp0::new(),
+            mi: MipsInterface::new(),
+            vi: VideoInterface::new(),
+            //ai: AudioInterface::new(),
+            //pi: PeripheralInterface::new(),
+            //ri: RdramInterface::new(),
+            si: SerialInterface::new(),
+        }
     }
 }

@@ -1,4 +1,7 @@
+//! CPU - Coprocessor 0
+
 use core::arch::asm;
+use core::marker::PhantomData;
 use proc_bitfield::bitfield;
 
 //TODO: Add remaining CP0 registers
@@ -20,10 +23,8 @@ macro_rules! cp0fn_wo {
         paste::paste! {
             #[doc = concat!("Writes to CP0 register ", stringify!($index), ".")]
             #[inline(always)]
-            pub fn [<set_ $reg>](data: $datatype) {
-                unsafe {
-                    [<write_ $width>]::<$index>(data.0);
-                }
+            pub unsafe fn [<set_ $reg>](data: $datatype) {
+                [<write_ $width>]::<$index>(data.0);
             }
         }
     };
@@ -36,12 +37,72 @@ macro_rules! cp0fn_rw {
         paste::paste! {
             #[doc = concat!("Reads from CP0 register ", stringify!($index), ", modifies the data, then writes it back into the register.")]
             #[inline(always)]
-            pub fn [<modify_ $reg>]<F: FnOnce($datatype) -> $datatype>(func: F) {
+            pub unsafe fn [<modify_ $reg>]<F: FnOnce($datatype) -> $datatype>(func: F) {
                 [<set_ $reg>](func($reg()));
             }
         }
     }
 }
+
+macro_rules! cp0method_ro {
+    ($reg:ident, $datatype:ident) => {
+        pub fn $reg(&self) -> $datatype {
+            $reg()
+        }
+    }
+}
+macro_rules! cp0method_wo {
+    ($reg:ident, $datatype:ident) => {
+        paste::paste! {
+            pub fn [<set_ $reg>](&self, data: $datatype) {
+                unsafe { [<set_ $reg>](data); }
+            }
+        }
+    }
+}
+macro_rules! cp0method_rw {
+    ($reg:ident, $datatype:ident) => {
+        cp0method_ro!($reg, $datatype);
+        cp0method_wo!($reg, $datatype);
+        
+        paste::paste! {
+            pub fn [<modify_ $reg>]<F: FnOnce($datatype) -> $datatype>(&self, func: F) {
+                unsafe { [<set_ $reg>](func($reg())); }
+            }
+        }
+    }
+}
+
+/// A zero-sized struct for accessing CP0 register via methods.
+/// 
+/// See [`Cp0::new()`] for usage details.
+pub struct Cp0 {
+    _marker: PhantomData<*const ()>
+}
+impl Cp0 {
+    /// Creates a new zero-sized struct providing access to CP0 registers.
+    /// 
+    /// Developers are recommended to use [`Hardware::take()`][crate::Hardware::take()] instead.
+    /// But for unrestricted, unsafe, access, this struct provides a method-based version to the
+    /// static functions available at the [module][crate::cp0] level.
+    /// 
+    /// # Safety
+    /// This provides unrestricted access to memory mapped registers. Data races _could_ occur if writing
+    /// to a register in both regular code and inside interrupt handlers.
+    /// 
+    /// This is especially problematic if performing a read-modify-write operation; an interrupt
+    /// could trigger between reading a register, and writing a modified value back to the same
+    /// register. Thus anything written to that register inside the interrupt, would only apply for
+    /// a short moment before being overwritten.
+    pub unsafe fn new() -> Self { Self {
+        _marker: PhantomData
+    }}
+    
+    cp0method_rw!(status, StatusReg);
+}
+
+cp0fn_rw!(status, u32, 12, StatusReg);
+
 
 bitfield! {
     #[derive(Copy, Clone, PartialEq, Eq)]
@@ -113,9 +174,6 @@ bitfield! {
         pub cu: u8 @ 28..=31,
     }
 }
-cp0fn_rw!(status, u32, 12, StatusReg);
-
-
 
 
 

@@ -1,8 +1,12 @@
+//! RCP - Serial Interface
+
 use core::ops::Deref;
 use proc_bitfield::bitfield;
 use crate::RW;
 
 /// A wrapper around a mutable reference to the Serial Interface's memory mapped registers.
+/// 
+/// See [`SerialInterface::new()`] for usage details.
 pub struct SerialInterface {
     r: &'static mut RegisterBlock,
 }
@@ -17,18 +21,23 @@ pub struct RegisterBlock {
     pub status: RW<StatusReg>,
 }
 impl SerialInterface {
-    /// Creates a new mutable reference to the Serial Interface's memory mapped registers, starting at `0xA4800000`.
+    /// Creates a new wrapped mutable reference to the Serial Interface's memory mapped registers, starting at `0xA4800000`.
     /// 
-    /// **This function is only recommended for internal use**, but is exposed for HAL developers who
-    /// wish to create a tangible object around these registers.
+    /// Developers are recommended to use [`Hardware::take()`][crate::Hardware::take()] instead.
+    /// But for unrestricted, unsafe, access, this struct provides a method-based version to the
+    /// static functions available at the [module][crate::si] level.
     /// 
     /// # Safety
-    /// You may create as many of these instances as you wish. Just note that if used in both normal
-    /// code, and within an interrupt handler/callback, unexpected could potentially occur if the
-    /// interrupt occurs during a read-modify-write operation.
+    /// This provides unrestricted access to memory mapped registers. Data races _could_ occur if writing
+    /// to a register in both regular code and inside interrupt handlers.
+    /// 
+    /// This is especially problematic if performing a read-modify-write operation; an interrupt
+    /// could trigger between reading a register, and writing a modified value back to the same
+    /// register. Thus anything written to that register inside the interrupt, would only apply for
+    /// a short moment before being overwritten.
     #[inline(always)]
-    pub fn new() -> Self { Self {
-        r: unsafe { &mut *(0xA4800000 as *mut RegisterBlock) }
+    pub unsafe fn new() -> Self { Self {
+        r: &mut *(0xA4800000 as *mut RegisterBlock)
     }}
 }
 impl Deref for SerialInterface {
@@ -64,7 +73,7 @@ bitfield! {
         /// Writing any value to the `SI_STATUS` register clears the flag across all three locations
         /// (this bit, `MI_INTERRUPT`, and the RCP Interrupt Cause register).
         /// 
-        /// SI Interrupts occur when either a DMA or IO write finishes.
+        /// SI Interrupts occur when a DMA write finishes.
         pub interrupt: bool @ 12,
     }
 }
