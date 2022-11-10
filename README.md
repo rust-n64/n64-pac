@@ -11,7 +11,7 @@ Due to the low-level nature of the API, most projects (games especially) are unl
 ### API Coverage
 | Peripheral | Registers | Complete |
 |:----------:|:---------:|:--------:|
-|    CP0     |  1 of 32  | &#10005; |
+|    CP0     | 32 of 32  | &#10003; |
 |    CP1     |  0 of 32  | &#10005; |
 |     MI     |  4 of 4   | &#10003; |
 |     VI     | 15 of 15  | &#10003; |
