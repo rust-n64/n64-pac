@@ -27,7 +27,7 @@ _* The SI likely contains more registers that haven't been fully researched._
 In your project's `Cargo.toml`:
 ```Toml
 [dependencies]
-n64-pac = "0.2.1"
+n64-pac = "0.2.2"
 ```
 
 Refer to the [docs](https://docs.rs/n64-pac) for examples and details regarding safety.

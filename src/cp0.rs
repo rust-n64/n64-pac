@@ -397,22 +397,22 @@ bitfield! {
         pub exception_code: u8 [ExceptionCode, ro] @ 2..=6,
         
         /// Software interrupt 0, set true to trigger interrupt
-        pub ip0: bool @ 7,
+        pub ip0: bool @ 8,
         /// Software interrupt 1, set true to trigger interrupt
-        pub ip1: bool @ 8,
+        pub ip1: bool @ 9,
         
         /// External interrupt `/INT0` (connected to RCP for IO Interface interrupts)
-        pub ip2: bool [ro] @ 9,
+        pub ip2: bool [ro] @ 10,
         /// External interrupt `/INT1` (available on cartridge port pin 44)
-        pub ip3: bool [ro] @ 10,
+        pub ip3: bool [ro] @ 11,
         /// External interrupt `/INT2` (aka PRE_NMI, triggers when PIF detects reset button was pressed)
-        pub ip4: bool [ro] @ 11,
+        pub ip4: bool [ro] @ 12,
         /// External interrupt `/INT3` (pulled high, can't be triggered without hardware modifications)
-        pub ip5: bool [ro] @ 12,
+        pub ip5: bool [ro] @ 13,
         /// External interrupt `/INT4` (pulled high, can't be triggered without hardware modifications)
-        pub ip6: bool [ro] @ 13,
+        pub ip6: bool [ro] @ 14,
         /// Timer interrupt
-        pub ip7: bool [ro] @ 14,
+        pub ip7: bool [ro] @ 15,
         
         /// Coprocessor unit number referenced when a Coprocessor Unusable exception has occurred. Otherwise undefined.
         pub ce: u8 [ro] @ 28..=29,
