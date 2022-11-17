@@ -15,7 +15,7 @@ Due to the low-level nature of the API, most projects (games especially) are unl
 |    CP1     |  0 of 32  | &#10005; |
 |     MI     |  4 of 4   | &#10003; |
 |     VI     | 15 of 15  | &#10003; |
-|     AI     |  0 of ?   | &#10005; |
+|     AI     |  6 of 6   | &#10003; |
 |     PI     |  0 of ?   | &#10005; |
 |     RI     |  0 of ?   | &#10005; |
 |     SI     |  6 of 6*  | &#10003; |
