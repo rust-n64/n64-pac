@@ -154,6 +154,7 @@ macro_rules! regfn_rw_union {
 pub mod ai;
 pub mod cp0;
 pub mod mi;
+pub mod pi;
 pub mod si;
 pub mod vi;
 
