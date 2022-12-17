@@ -82,8 +82,11 @@
 #![feature(asm_experimental_arch)]
 #![feature(asm_const)]
 
+use crate::ai::AudioInterface;
 use crate::cp0::Cp0;
+use crate::cp1::Cp1;
 use crate::mi::MipsInterface;
+use crate::pi::PeripheralInterface;
 use crate::si::SerialInterface;
 use crate::vi::VideoInterface;
 
@@ -151,8 +154,53 @@ macro_rules! regfn_rw_union {
     }
 }
 
+macro_rules! cpxmethod_ro {
+    ($reg:ident, $datatype:ident) => {
+        pub fn $reg(&self) -> $datatype {
+            $reg()
+        }
+    }
+}
+macro_rules! cpxmethod_wo {
+    ($reg:ident, $datatype:ident) => {
+        paste::paste! {
+            pub fn [<set_ $reg>](&self, data: $datatype) {
+                unsafe { [<set_ $reg>](data); }
+            }
+        }
+    }
+}
+macro_rules! cpxmethod_rw {
+    ($reg:ident, $datatype:ident) => {
+        cpxmethod_ro!($reg, $datatype);
+        cpxmethod_wo!($reg, $datatype);
+        
+        paste::paste! {
+            pub fn [<modify_ $reg>]<F: FnOnce($datatype) -> $datatype>(&self, func: F) {
+                unsafe { [<set_ $reg>](func($reg())); }
+            }
+        }
+    }
+}
+
+macro_rules! derive_tofrom_primitive {
+    ($kind:ident, $prim:ident) => {
+        impl From<$prim> for $kind {
+            fn from(value: $prim) -> Self {
+                Self(value)
+            }
+        }
+        impl From<$kind> for $prim {
+            fn from(value: $kind) -> Self {
+                value.0
+            }
+        }
+    }
+}
+
 pub mod ai;
 pub mod cp0;
+pub mod cp1;
 pub mod mi;
 pub mod pi;
 pub mod si;
@@ -219,10 +267,11 @@ static mut HARDWARE_TAKEN: bool = false;
 /// data races when interrupts are enabled, or if using async Rust.
 pub struct Hardware {
     pub cp0: Cp0,
+    pub cp1: Cp1,
     pub mi: MipsInterface,
     pub vi: VideoInterface,
-    //pub ai: AudioInterface,
-    //pub pi: PeripheralInterface,
+    pub ai: AudioInterface,
+    pub pi: PeripheralInterface,
     //pub ri: RdramInterface,
     pub si: SerialInterface,
 }
@@ -259,10 +308,11 @@ impl Hardware {
         
         Self {
             cp0: Cp0::new(),
+            cp1: Cp1::new(),
             mi: MipsInterface::new(),
             vi: VideoInterface::new(),
-            //ai: AudioInterface::new(),
-            //pi: PeripheralInterface::new(),
+            ai: AudioInterface::new(),
+            pi: PeripheralInterface::new(),
             //ri: RdramInterface::new(),
             si: SerialInterface::new(),
         }

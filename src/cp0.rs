@@ -44,51 +44,7 @@ macro_rules! cp0fn_rw {
     }
 }
 
-macro_rules! cp0method_ro {
-    ($reg:ident, $datatype:ident) => {
-        pub fn $reg(&self) -> $datatype {
-            $reg()
-        }
-    }
-}
-macro_rules! cp0method_wo {
-    ($reg:ident, $datatype:ident) => {
-        paste::paste! {
-            pub fn [<set_ $reg>](&self, data: $datatype) {
-                unsafe { [<set_ $reg>](data); }
-            }
-        }
-    }
-}
-macro_rules! cp0method_rw {
-    ($reg:ident, $datatype:ident) => {
-        cp0method_ro!($reg, $datatype);
-        cp0method_wo!($reg, $datatype);
-        
-        paste::paste! {
-            pub fn [<modify_ $reg>]<F: FnOnce($datatype) -> $datatype>(&self, func: F) {
-                unsafe { [<set_ $reg>](func($reg())); }
-            }
-        }
-    }
-}
-
-macro_rules! derive_tofrom_primitive {
-    ($kind:ident, $prim:ident) => {
-        impl From<$prim> for $kind {
-            fn from(value: $prim) -> Self {
-                Self(value)
-            }
-        }
-        impl From<$kind> for $prim {
-            fn from(value: $kind) -> Self {
-                value.0
-            }
-        }
-    }
-}
-
-/// A zero-sized struct for accessing CP0 register via methods.
+/// A zero-sized struct for accessing CP0 registers via methods.
 /// 
 /// See [`Cp0::new()`] for usage details.
 pub struct Cp0 {
@@ -113,29 +69,29 @@ impl Cp0 {
         _marker: PhantomData
     }}
     
-    cp0method_rw!(index, IndexReg);
-    cp0method_rw!(random, RandomReg);
-    cp0method_rw!(entrylo0, EntryLoReg);
-    cp0method_rw!(entrylo1, EntryLoReg);
-    cp0method_rw!(context, ContextReg);
-    cp0method_rw!(pagemask, PageMaskReg);
-    cp0method_rw!(wired, WiredReg);
-    cp0method_ro!(badvaddr, BadVAddrReg);
-    cp0method_rw!(count, u32);
-    cp0method_rw!(entryhi, EntryHiReg);
-    cp0method_rw!(compare, u32);
-    cp0method_rw!(status, StatusReg);
-    cp0method_rw!(cause, CauseReg);
-    cp0method_rw!(exception_pc, ExceptionPcReg);
-    cp0method_ro!(processor_revision_id, ProcessorRevisionIdReg);
-    cp0method_rw!(config, ConfigReg);
-    cp0method_rw!(load_linked_address, u32);
-    cp0method_rw!(watchlo, WatchLoReg);
-    cp0method_rw!(watchhi, WatchHiReg);
-    cp0method_rw!(xcontext, XContextReg);
-    cp0method_rw!(parity_error, ParityErrorReg);
-    cp0method_rw!(taglo, TagLoReg);
-    cp0method_rw!(error_exception_pc, ErrorExceptionPcReg);
+    cpxmethod_rw!(index, IndexReg);
+    cpxmethod_rw!(random, RandomReg);
+    cpxmethod_rw!(entrylo0, EntryLoReg);
+    cpxmethod_rw!(entrylo1, EntryLoReg);
+    cpxmethod_rw!(context, ContextReg);
+    cpxmethod_rw!(pagemask, PageMaskReg);
+    cpxmethod_rw!(wired, WiredReg);
+    cpxmethod_ro!(badvaddr, BadVAddrReg);
+    cpxmethod_rw!(count, u32);
+    cpxmethod_rw!(entryhi, EntryHiReg);
+    cpxmethod_rw!(compare, u32);
+    cpxmethod_rw!(status, StatusReg);
+    cpxmethod_rw!(cause, CauseReg);
+    cpxmethod_rw!(exception_pc, ExceptionPcReg);
+    cpxmethod_ro!(processor_revision_id, ProcessorRevisionIdReg);
+    cpxmethod_rw!(config, ConfigReg);
+    cpxmethod_rw!(load_linked_address, u32);
+    cpxmethod_rw!(watchlo, WatchLoReg);
+    cpxmethod_rw!(watchhi, WatchHiReg);
+    cpxmethod_rw!(xcontext, XContextReg);
+    cpxmethod_rw!(parity_error, ParityErrorReg);
+    cpxmethod_rw!(taglo, TagLoReg);
+    cpxmethod_rw!(error_exception_pc, ErrorExceptionPcReg);
 }
 
 cp0fn_rw!(index, u32, 0, IndexReg);
