@@ -14,7 +14,7 @@ Due to the low-level nature of the API, most projects (games especially) are unl
 |    CP0     | 32 of 32  | &#10003; |
 |    CP1     |  2 of 2*  | &#10003; |
 |     MI     |  4 of 4   | &#10003; |
-|     VI     | 15 of 15  | &#10003; |
+|     VI     | 16 of 16  | &#10003; |
 |     AI     |  6 of 6   | &#10003; |
 |     PI     | 13 of 13  | &#10003; |
 |     RI     |  0 of ?   | &#10005; |
@@ -28,7 +28,7 @@ _** The SI might contain more registers that haven't been fully researched._
 In your project's `Cargo.toml`:
 ```Toml
 [dependencies]
-n64-pac = "0.3"
+n64-pac = "0.x.y"
 ```
 
 Refer to the [docs](https://docs.rs/n64-pac) for examples and details regarding safety.

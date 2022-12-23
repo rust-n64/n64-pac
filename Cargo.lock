@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "n64-pac"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "num_enum",
  "paste",
@@ -39,9 +39,9 @@ checksum = "b1de2e551fb905ac83f73f7aedf2f0cb4a0da7e35efa24a202a936269f1f18e1"
 
 [[package]]
 name = "proc-bitfield"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad723b928a5e2ae408cef91c9e1d69ef8f3cd9ea38f38f5874ef80ba9d34a37a"
+checksum = "c8ecfb67b750a2bf444480ec637b40f8f9d76d74bf59f7a4bfa26b9a9669a73b"
 dependencies = [
  "proc-bitfield-macros",
  "static_assertions",
@@ -49,9 +49,9 @@ dependencies = [
 
 [[package]]
 name = "proc-bitfield-macros"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8166ee57b771b768745ff73cc24cf3ca77aee7f56c627bad47a0381d7e68e4f6"
+checksum = "f75bb614a4c89e41b25c8875306887991b85b3af62a0017d8e1129652f948bda"
 dependencies = [
  "quote",
  "syn",

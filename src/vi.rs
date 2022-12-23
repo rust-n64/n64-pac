@@ -18,6 +18,7 @@ pub struct RegisterBlock {
     pub origin: RW<u32>,
     pub width: RW<u32>,
     pub v_intr: RW<u32>,
+    pub v_current: RW<u32>,
     pub burst: RW<BurstReg>,
     pub v_sync: RW<u32>,
     pub h_sync: RW<HSyncReg>,
@@ -62,6 +63,7 @@ regfn_rw!(VideoInterface, ctrl, CTRL, CtrlReg);
 regfn_rw!(VideoInterface, origin, ORIGIN, u32);
 regfn_rw!(VideoInterface, width, WIDTH, u32);
 regfn_rw!(VideoInterface, v_intr, V_INTR, u32);
+regfn_rw!(VideoInterface, v_current, V_CURRENT, u32);
 regfn_rw!(VideoInterface, burst, BURST, BurstReg);
 regfn_rw!(VideoInterface, v_sync, V_SYNC, u32);
 regfn_rw!(VideoInterface, h_sync, H_SYNC, HSyncReg);
