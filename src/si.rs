@@ -16,6 +16,8 @@ pub struct RegisterBlock {
     pub dram_addr: RW<u32>,
     pub pif_ad_rd64b: RW<u32>,
     pub pif_ad_wr4b: RW<u32>,
+    /// Seemingly unused; more research required
+    _spacer: u32,
     pub pif_ad_wr64b: RW<u32>,
     pub pif_ad_rd4b: RW<u32>,
     pub status: RW<StatusReg>,
