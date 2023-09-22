@@ -42,7 +42,8 @@ impl AudioInterface {
 }
 impl Deref for AudioInterface {
     type Target = RegisterBlock;
-
+    
+    #[inline(always)]
     fn deref(&self) -> &Self::Target {
         self.r
     }

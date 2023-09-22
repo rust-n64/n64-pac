@@ -40,7 +40,8 @@ impl MipsInterface {
 }
 impl Deref for MipsInterface {
     type Target = RegisterBlock;
-
+    
+    #[inline(always)]
     fn deref(&self) -> &Self::Target {
         self.r
     }

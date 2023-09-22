@@ -49,7 +49,8 @@ impl PeripheralInterface {
 }
 impl Deref for PeripheralInterface {
     type Target = RegisterBlock;
-
+    
+    #[inline(always)]
     fn deref(&self) -> &Self::Target {
         self.r
     }

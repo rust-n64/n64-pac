@@ -53,7 +53,8 @@ impl VideoInterface {
 }
 impl Deref for VideoInterface {
     type Target = RegisterBlock;
-
+    
+    #[inline(always)]
     fn deref(&self) -> &Self::Target {
         self.r
     }

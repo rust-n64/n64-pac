@@ -44,7 +44,8 @@ impl SerialInterface {
 }
 impl Deref for SerialInterface {
     type Target = RegisterBlock;
-
+    
+    #[inline(always)]
     fn deref(&self) -> &Self::Target {
         self.r
     }
