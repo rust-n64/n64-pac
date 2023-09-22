@@ -5,7 +5,7 @@ use proc_bitfield::bitfield;
 use crate::{RW, WO};
 
 /// A wrapper around a mutable reference to the Audio Interface's memory mapped registers.
-/// 
+///
 /// See [`AudioInterface::new()`] for usage details.
 pub struct AudioInterface {
     r: &'static mut RegisterBlock,
@@ -22,15 +22,15 @@ pub struct RegisterBlock {
 }
 impl AudioInterface {
     /// Creates a new wrapped mutable reference to the Audio Interface's memory mapped registers, starting at `0xA4500000`.
-    /// 
+    ///
     /// Developers are recommended to use [`Hardware::take()`][crate::Hardware::take()] instead.
     /// But for unrestricted, unsafe, access, this struct provides a method-based version to the
     /// static functions available at the [module][crate::ai] level.
-    /// 
+    ///
     /// # Safety
     /// This provides unrestricted access to memory mapped registers. Data races _could_ occur if writing
     /// to a register in both regular code and inside interrupt handlers.
-    /// 
+    ///
     /// This is especially problematic if performing a read-modify-write operation; an interrupt
     /// could trigger between reading a register, and writing a modified value back to the same
     /// register. Thus anything written to that register inside the interrupt, would only apply for
@@ -64,7 +64,7 @@ bitfield! {
     #[derive(Copy, Clone, PartialEq, Eq)]
     pub struct StatusReg(pub u32): Debug {
         pub clear_interrupt: u32 [wo] @ ..,
-        
+
         pub full: bool [ro] @ 0, // bit 31 returns the same value; but bit 0 is used because it's more efficient
         pub dac_cntr: u16 [ro] @ 1..=14,
         pub bitclock_state: bool [ro] @ 16,

@@ -5,7 +5,7 @@ use proc_bitfield::bitfield;
 use crate::RW;
 
 /// A wrapper around a mutable reference to the Peripheral Interface's memory mapped registers.
-/// 
+///
 /// See [`PeripheralInterface::new()`] for usage details.
 pub struct PeripheralInterface {
     r: &'static mut RegisterBlock,
@@ -29,15 +29,15 @@ pub struct RegisterBlock {
 }
 impl PeripheralInterface {
     /// Creates a new wrapped mutable reference to the Peripheral Interface's memory mapped registers, starting at `0xA4600000`.
-    /// 
+    ///
     /// Developers are recommended to use [`Hardware::take()`][crate::Hardware::take()] instead.
     /// But for unrestricted, unsafe, access, this struct provides a method-based version to the
     /// static functions available at the [module][crate::pi] level.
-    /// 
+    ///
     /// # Safety
     /// This provides unrestricted access to memory mapped registers. Data races _could_ occur if writing
     /// to a register in both regular code and inside interrupt handlers.
-    /// 
+    ///
     /// This is especially problematic if performing a read-modify-write operation; an interrupt
     /// could trigger between reading a register, and writing a modified value back to the same
     /// register. Thus anything written to that register inside the interrupt, would only apply for
@@ -87,7 +87,7 @@ impl StatusRegWrite {
     pub fn clear_interrupt(self) -> Self {
         self.with_clear_interrupt(true)
     }
-    
+
     #[inline(always)]
     pub fn reset_dma(self) -> Self {
         self.with_reset_dma(true)

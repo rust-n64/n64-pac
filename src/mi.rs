@@ -5,7 +5,7 @@ use proc_bitfield::bitfield;
 use crate::{RO, RW};
 
 /// A wrapper around a mutable reference to the MIPS Interface's memory mapped registers.
-/// 
+///
 /// See [`MipsInterface::new()`] for usage details.
 pub struct MipsInterface {
     r: &'static mut RegisterBlock,
@@ -20,15 +20,15 @@ pub struct RegisterBlock {
 }
 impl MipsInterface {
     /// Creates a new wrapped mutable reference to the MIPS Interface's memory mapped registers, starting at `0xA4300000`.
-    /// 
+    ///
     /// Developers are recommended to use [`Hardware::take()`][crate::Hardware::take()] instead.
     /// But for unrestricted, unsafe, access, this struct provides a method-based version to the
     /// static functions available at the [module][crate::mi] level.
-    /// 
+    ///
     /// # Safety
     /// This provides unrestricted access to memory mapped registers. Data races _could_ occur if writing
     /// to a register in both regular code and inside interrupt handlers.
-    /// 
+    ///
     /// This is especially problematic if performing a read-modify-write operation; an interrupt
     /// could trigger between reading a register, and writing a modified value back to the same
     /// register. Thus anything written to that register inside the interrupt, would only apply for
@@ -88,32 +88,32 @@ impl ModeRegWrite {
     pub fn clear_init_mode(self) -> Self {
         self.with_clear_init_mode(true)
     }
-    
+
     #[inline(always)]
     pub fn set_init_mode(self) -> Self {
         self.with_set_init_mode(true)
     }
-    
+
     #[inline(always)]
     pub fn clear_ebus_test_mode(self) -> Self {
         self.with_clear_ebus_test_mode(true)
     }
-    
+
     #[inline(always)]
     pub fn set_ebus_test_mode(self) -> Self {
         self.with_set_ebus_test_mode(true)
     }
-    
+
     #[inline(always)]
     pub fn clear_dp_interrupt(self) -> Self {
         self.with_clear_dp_interrupt(true)
     }
-    
+
     #[inline(always)]
     pub fn clear_rdram_register_mode(self) -> Self {
         self.with_clear_rdram_register_mode(true)
     }
-    
+
     #[inline(always)]
     pub fn set_rdram_register_mode(self) -> Self {
         self.with_set_rdram_register_mode(true)
@@ -190,27 +190,27 @@ impl MaskRegWrite {
     pub fn clear_sp_mask(self) -> Self { self.with_clear_sp(true) }
     #[inline(always)]
     pub fn set_sp_mask(self) -> Self { self.with_set_sp(true) }
-    
+
     #[inline(always)]
     pub fn clear_si_mask(self) -> Self { self.with_clear_si(true) }
     #[inline(always)]
     pub fn set_si_mask(self) -> Self { self.with_set_si(true) }
-    
+
     #[inline(always)]
     pub fn clear_ai_mask(self) -> Self { self.with_clear_ai(true) }
     #[inline(always)]
     pub fn set_ai_mask(self) -> Self { self.with_set_ai(true) }
-    
+
     #[inline(always)]
     pub fn clear_vi_mask(self) -> Self { self.with_clear_vi(true) }
     #[inline(always)]
     pub fn set_vi_mask(self) -> Self { self.with_set_vi(true) }
-    
+
     #[inline(always)]
     pub fn clear_pi_mask(self) -> Self { self.with_clear_pi(true) }
     #[inline(always)]
     pub fn set_pi_mask(self) -> Self { self.with_set_pi(true) }
-    
+
     #[inline(always)]
     pub fn clear_dp_mask(self) -> Self { self.with_clear_dp(true) }
     #[inline(always)]
